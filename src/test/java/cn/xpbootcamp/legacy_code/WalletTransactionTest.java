@@ -15,6 +15,7 @@ import java.lang.reflect.Field;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static cn.xpbootcamp.legacy_code.enums.STATUS.EXPIRED;
 import static cn.xpbootcamp.legacy_code.enums.STATUS.TO_BE_EXECUTED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -210,6 +211,40 @@ class WalletTransactionTest {
         assertThat(executeResult).isFalse();
     }
 
+
+    @Test
+    void should_return_false_when_transaction_created_time_over_20_days()
+            throws InvalidTransactionException, NoSuchFieldException, IllegalAccessException {
+        // given
+        String preAssignedId = "t_" + UUID.randomUUID().toString();
+        Long buyerId = 123L;
+        Long sellerId = 234L;
+        Long productId = 8989L;
+        String orderId = UUID.randomUUID().toString();
+        Double amount = 34.5;
+
+        given(distributedLock.lock(preAssignedId)).willReturn(true);
+
+        WalletTransaction walletTransaction =
+                new WalletTransaction(preAssignedId, buyerId, sellerId, productId, orderId, amount);
+        walletTransaction.setDistributedLock(distributedLock);
+        setPrivateField(walletTransaction, "createdTimestamp", 0L);
+
+        // when
+        boolean executeResult = walletTransaction.execute();
+
+        // then
+        assertThat(executeResult).isFalse();
+        assertThat(getPrivateField(walletTransaction, "status", STATUS.class)).isEqualTo(EXPIRED);
+    }
+
+    private void setPrivateField(
+            WalletTransaction walletTransaction, String fieldName, Object value)
+            throws NoSuchFieldException, IllegalAccessException {
+        Field field = WalletTransaction.class.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        field.set(walletTransaction, value);
+    }
 
     private <T> T getPrivateField(
             WalletTransaction walletTransaction, String fieldName, Class<T> type)

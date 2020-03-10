@@ -19,8 +19,13 @@ public class WalletTransaction {
     private STATUS status;
     private String walletTransactionId;
 
-
-    public WalletTransaction(String preAssignedId, Long buyerId, Long sellerId, Long productId, String orderId) {
+    public WalletTransaction(
+            String preAssignedId,
+            Long buyerId,
+            Long sellerId,
+            Long productId,
+            String orderId,
+            Double amount) {
         if (preAssignedId != null && !preAssignedId.isEmpty()) {
             this.id = preAssignedId;
         } else {
@@ -33,6 +38,7 @@ public class WalletTransaction {
         this.sellerId = sellerId;
         this.productId = productId;
         this.orderId = orderId;
+        this.amount = amount;
         this.status = STATUS.TO_BE_EXECUTED;
         this.createdTimestamp = System.currentTimeMillis();
     }

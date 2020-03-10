@@ -26,9 +26,10 @@ class WalletTransactionTest {
         Long sellerId = 234L;
         Long productId = 8989L;
         String orderId = UUID.randomUUID().toString();
+        Double amount = 34.5;
 
         WalletTransaction walletTransaction =
-                new WalletTransaction(preAssignedId, buyerId, sellerId, productId, orderId);
+                new WalletTransaction(preAssignedId, buyerId, sellerId, productId, orderId, amount);
 
         assertThat(walletTransaction).isNotNull();
         assertThat(getPrivateField(walletTransaction, "id", String.class)).startsWith("t_");
@@ -37,7 +38,7 @@ class WalletTransactionTest {
         assertThat(getPrivateField(walletTransaction, "productId", Long.class)).isEqualTo(productId);
         assertThat(getPrivateField(walletTransaction, "orderId", String.class)).isEqualTo(orderId);
         assertThat(getPrivateField(walletTransaction, "createdTimestamp", Long.class)).isNotNull();
-        assertThat(getPrivateField(walletTransaction, "amount", Double.class)).isNull();
+        assertThat(getPrivateField(walletTransaction, "amount", Double.class)).isEqualTo(amount);
         assertThat(getPrivateField(walletTransaction, "status", STATUS.class))
                 .isEqualTo(TO_BE_EXECUTED);
         assertThat(getPrivateField(walletTransaction, "walletTransactionId", String.class)).isNull();
@@ -51,9 +52,10 @@ class WalletTransactionTest {
         Long sellerId = 234L;
         Long productId = 8989L;
         String orderId = UUID.randomUUID().toString();
+        Double amount = 34.5;
 
         WalletTransaction walletTransaction =
-                new WalletTransaction(preAssignedId, buyerId, sellerId, productId, orderId);
+                new WalletTransaction(preAssignedId, buyerId, sellerId, productId, orderId, amount);
 
         assertThat(getPrivateField(walletTransaction, "id", String.class)).startsWith("t_");
     }

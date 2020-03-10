@@ -1,6 +1,6 @@
 package cn.xpbootcamp.legacy_code;
 
-import cn.xpbootcamp.legacy_code.enums.STATUS;
+import cn.xpbootcamp.legacy_code.enums.WalletTransactionStatus;
 import cn.xpbootcamp.legacy_code.service.WalletService;
 import cn.xpbootcamp.legacy_code.utils.DistributedLock;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,7 @@ import java.lang.reflect.Field;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static cn.xpbootcamp.legacy_code.enums.STATUS.*;
+import static cn.xpbootcamp.legacy_code.enums.WalletTransactionStatus.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
@@ -53,7 +53,7 @@ class WalletTransactionTest {
         assertThat(getPrivateField(walletTransaction, "sellerId", Long.class)).isEqualTo(sellerId);
         assertThat(getPrivateField(walletTransaction, "createdTimestamp", Long.class)).isNotNull();
         assertThat(getPrivateField(walletTransaction, "amount", Double.class)).isEqualTo(amount);
-        assertThat(getPrivateField(walletTransaction, "status", STATUS.class))
+        assertThat(getPrivateField(walletTransaction, "status", WalletTransactionStatus.class))
                 .isEqualTo(TO_BE_EXECUTED);
     }
 
@@ -212,7 +212,7 @@ class WalletTransactionTest {
 
         // then
         assertThat(executeResult).isFalse();
-        assertThat(getPrivateField(walletTransaction, "status", STATUS.class)).isEqualTo(EXPIRED);
+        assertThat(getPrivateField(walletTransaction, "status", WalletTransactionStatus.class)).isEqualTo(EXPIRED);
     }
 
     @Test
@@ -238,7 +238,7 @@ class WalletTransactionTest {
 
         // then
         assertThat(executeResult).isFalse();
-        assertThat(getPrivateField(walletTransaction, "status", STATUS.class)).isEqualTo(FAILED);
+        assertThat(getPrivateField(walletTransaction, "status", WalletTransactionStatus.class)).isEqualTo(FAILED);
     }
 
     private void setCreatedTimeStampOver20DaysAgo(WalletTransaction walletTransaction)

@@ -2,12 +2,15 @@ package cn.xpbootcamp.legacy_code.service;
 
 import cn.xpbootcamp.legacy_code.entity.User;
 import cn.xpbootcamp.legacy_code.repository.UserRepository;
-import cn.xpbootcamp.legacy_code.repository.UserRepositoryImpl;
 
 import java.util.UUID;
 
 public class WalletServiceImpl implements WalletService {
-    private UserRepository userRepository = new UserRepositoryImpl();
+    private UserRepository userRepository;
+
+    public void setUserRepository(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     public String moveMoney(String id, long buyerId, long sellerId, double amount) {
         User buyer = userRepository.find(buyerId);

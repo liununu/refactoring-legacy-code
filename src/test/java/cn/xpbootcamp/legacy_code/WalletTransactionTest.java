@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 
 import static cn.xpbootcamp.legacy_code.enums.STATUS.TO_BE_EXECUTED;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
@@ -104,6 +105,54 @@ class WalletTransactionTest {
 
         // then
         assertThat(executeResult).isTrue();
+    }
+
+    @Test
+    void should_throw_invalid_transaction_exception_when_execute_with_null_buyer_id() {
+        // given
+        String preAssignedId = "t_" + UUID.randomUUID().toString();
+        Long sellerId = 234L;
+        Long productId = 8989L;
+        String orderId = UUID.randomUUID().toString();
+        Double amount = 34.5;
+        WalletTransaction walletTransaction =
+                new WalletTransaction(preAssignedId, null, sellerId, productId, orderId, amount);
+
+        // when then
+        assertThatExceptionOfType(InvalidTransactionException.class)
+                .isThrownBy(walletTransaction::execute);
+    }
+
+    @Test
+    void should_throw_invalid_transaction_exception_when_execute_with_null_seller_id() {
+        // given
+        String preAssignedId = "t_" + UUID.randomUUID().toString();
+        Long buyerId = 123L;
+        Long productId = 8989L;
+        String orderId = UUID.randomUUID().toString();
+        Double amount = 34.5;
+        WalletTransaction walletTransaction =
+                new WalletTransaction(preAssignedId, buyerId, null, productId, orderId, amount);
+
+        // when then
+        assertThatExceptionOfType(InvalidTransactionException.class)
+                .isThrownBy(walletTransaction::execute);
+    }
+
+    @Test
+    void should_throw_invalid_transaction_exception_when_execute_with_amount_less_than_0() {
+        // given
+        String preAssignedId = "t_" + UUID.randomUUID().toString();
+        Long buyerId = 123L;
+        Long sellerId = 234L;
+        Long productId = 8989L;
+        String orderId = UUID.randomUUID().toString();
+        WalletTransaction walletTransaction =
+                new WalletTransaction(preAssignedId, buyerId, sellerId, productId, orderId, -0.01);
+
+        // when then
+        assertThatExceptionOfType(InvalidTransactionException.class)
+                .isThrownBy(walletTransaction::execute);
     }
 
     private <T> T getPrivateField(

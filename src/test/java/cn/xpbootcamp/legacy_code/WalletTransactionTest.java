@@ -40,26 +40,21 @@ class WalletTransactionTest {
         String preAssignedId = UUID.randomUUID().toString();
         Long buyerId = 123L;
         Long sellerId = 234L;
-        Long productId = 8989L;
-        String orderId = UUID.randomUUID().toString();
         Double amount = 34.5;
 
         // when
         WalletTransaction walletTransaction =
-                new WalletTransaction(preAssignedId, buyerId, sellerId, productId, orderId, amount);
+                new WalletTransaction(preAssignedId, buyerId, sellerId, amount);
 
         // then
         assertThat(walletTransaction).isNotNull();
         assertThat(getPrivateField(walletTransaction, "id", String.class)).startsWith("t_");
         assertThat(getPrivateField(walletTransaction, "buyerId", Long.class)).isEqualTo(buyerId);
         assertThat(getPrivateField(walletTransaction, "sellerId", Long.class)).isEqualTo(sellerId);
-        assertThat(getPrivateField(walletTransaction, "productId", Long.class)).isEqualTo(productId);
-        assertThat(getPrivateField(walletTransaction, "orderId", String.class)).isEqualTo(orderId);
         assertThat(getPrivateField(walletTransaction, "createdTimestamp", Long.class)).isNotNull();
         assertThat(getPrivateField(walletTransaction, "amount", Double.class)).isEqualTo(amount);
         assertThat(getPrivateField(walletTransaction, "status", STATUS.class))
                 .isEqualTo(TO_BE_EXECUTED);
-        assertThat(getPrivateField(walletTransaction, "walletTransactionId", String.class)).isNull();
     }
 
     @ParameterizedTest
@@ -69,13 +64,11 @@ class WalletTransactionTest {
         // given
         Long buyerId = 123L;
         Long sellerId = 234L;
-        Long productId = 8989L;
-        String orderId = UUID.randomUUID().toString();
         Double amount = 34.5;
 
         // when
         WalletTransaction walletTransaction =
-                new WalletTransaction(preAssignedId, buyerId, sellerId, productId, orderId, amount);
+                new WalletTransaction(preAssignedId, buyerId, sellerId, amount);
 
         // then
         assertThat(getPrivateField(walletTransaction, "id", String.class)).startsWith("t_");
@@ -87,8 +80,6 @@ class WalletTransactionTest {
         String preAssignedId = "t_" + UUID.randomUUID().toString();
         Long buyerId = 123L;
         Long sellerId = 234L;
-        Long productId = 8989L;
-        String orderId = UUID.randomUUID().toString();
         Double amount = 34.5;
 
         given(distributedLock.lock(preAssignedId)).willReturn(true);
@@ -97,7 +88,7 @@ class WalletTransactionTest {
                 .willReturn(walletTransactionId);
 
         WalletTransaction walletTransaction =
-                new WalletTransaction(preAssignedId, buyerId, sellerId, productId, orderId, amount);
+                new WalletTransaction(preAssignedId, buyerId, sellerId, amount);
         walletTransaction.setDistributedLock(distributedLock);
         walletTransaction.setWalletService(walletService);
 
@@ -113,11 +104,9 @@ class WalletTransactionTest {
         // given
         String preAssignedId = "t_" + UUID.randomUUID().toString();
         Long sellerId = 234L;
-        Long productId = 8989L;
-        String orderId = UUID.randomUUID().toString();
         Double amount = 34.5;
         WalletTransaction walletTransaction =
-                new WalletTransaction(preAssignedId, null, sellerId, productId, orderId, amount);
+                new WalletTransaction(preAssignedId, null, sellerId, amount);
 
         // when then
         assertThatExceptionOfType(InvalidTransactionException.class)
@@ -129,11 +118,9 @@ class WalletTransactionTest {
         // given
         String preAssignedId = "t_" + UUID.randomUUID().toString();
         Long buyerId = 123L;
-        Long productId = 8989L;
-        String orderId = UUID.randomUUID().toString();
         Double amount = 34.5;
         WalletTransaction walletTransaction =
-                new WalletTransaction(preAssignedId, buyerId, null, productId, orderId, amount);
+                new WalletTransaction(preAssignedId, buyerId, null, amount);
 
         // when then
         assertThatExceptionOfType(InvalidTransactionException.class)
@@ -146,10 +133,8 @@ class WalletTransactionTest {
         String preAssignedId = "t_" + UUID.randomUUID().toString();
         Long buyerId = 123L;
         Long sellerId = 234L;
-        Long productId = 8989L;
-        String orderId = UUID.randomUUID().toString();
         WalletTransaction walletTransaction =
-                new WalletTransaction(preAssignedId, buyerId, sellerId, productId, orderId, -0.01);
+                new WalletTransaction(preAssignedId, buyerId, sellerId, -0.01);
 
         // when then
         assertThatExceptionOfType(InvalidTransactionException.class)
@@ -162,8 +147,6 @@ class WalletTransactionTest {
         String preAssignedId = "t_" + UUID.randomUUID().toString();
         Long buyerId = 123L;
         Long sellerId = 234L;
-        Long productId = 8989L;
-        String orderId = UUID.randomUUID().toString();
         Double amount = 34.5;
 
         given(distributedLock.lock(preAssignedId)).willReturn(true);
@@ -172,7 +155,7 @@ class WalletTransactionTest {
                 .willReturn(walletTransactionId);
 
         WalletTransaction walletTransaction =
-                new WalletTransaction(preAssignedId, buyerId, sellerId, productId, orderId, amount);
+                new WalletTransaction(preAssignedId, buyerId, sellerId, amount);
         walletTransaction.setDistributedLock(distributedLock);
         walletTransaction.setWalletService(walletService);
         walletTransaction.execute();
@@ -193,14 +176,12 @@ class WalletTransactionTest {
         String preAssignedId = "t_" + UUID.randomUUID().toString();
         Long buyerId = 123L;
         Long sellerId = 234L;
-        Long productId = 8989L;
-        String orderId = UUID.randomUUID().toString();
         Double amount = 34.5;
 
         given(distributedLock.lock(preAssignedId)).willReturn(false);
 
         WalletTransaction walletTransaction =
-                new WalletTransaction(preAssignedId, buyerId, sellerId, productId, orderId, amount);
+                new WalletTransaction(preAssignedId, buyerId, sellerId, amount);
         walletTransaction.setDistributedLock(distributedLock);
 
         // when
@@ -217,14 +198,12 @@ class WalletTransactionTest {
         String preAssignedId = "t_" + UUID.randomUUID().toString();
         Long buyerId = 123L;
         Long sellerId = 234L;
-        Long productId = 8989L;
-        String orderId = UUID.randomUUID().toString();
         Double amount = 34.5;
 
         given(distributedLock.lock(preAssignedId)).willReturn(true);
 
         WalletTransaction walletTransaction =
-                new WalletTransaction(preAssignedId, buyerId, sellerId, productId, orderId, amount);
+                new WalletTransaction(preAssignedId, buyerId, sellerId, amount);
         walletTransaction.setDistributedLock(distributedLock);
         setPrivateField(walletTransaction, "createdTimestamp", 0L);
 
@@ -243,8 +222,6 @@ class WalletTransactionTest {
         String preAssignedId = "t_" + UUID.randomUUID().toString();
         Long buyerId = 123L;
         Long sellerId = 234L;
-        Long productId = 8989L;
-        String orderId = UUID.randomUUID().toString();
         Double amount = 34.5;
 
         given(distributedLock.lock(preAssignedId)).willReturn(true);
@@ -252,7 +229,7 @@ class WalletTransactionTest {
                 .willReturn(null);
 
         WalletTransaction walletTransaction =
-                new WalletTransaction(preAssignedId, buyerId, sellerId, productId, orderId, amount);
+                new WalletTransaction(preAssignedId, buyerId, sellerId, amount);
         walletTransaction.setDistributedLock(distributedLock);
         walletTransaction.setWalletService(walletService);
 

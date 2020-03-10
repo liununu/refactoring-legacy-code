@@ -1,18 +1,31 @@
 package cn.xpbootcamp.legacy_code;
 
 import cn.xpbootcamp.legacy_code.enums.STATUS;
+import cn.xpbootcamp.legacy_code.service.WalletService;
+import cn.xpbootcamp.legacy_code.utils.DistributedLock;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.transaction.InvalidTransactionException;
 import java.lang.reflect.Field;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import static cn.xpbootcamp.legacy_code.enums.STATUS.TO_BE_EXECUTED;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 
+@ExtendWith(MockitoExtension.class)
 class WalletTransactionTest {
+
+    @Mock
+    private DistributedLock distributedLock;
+    @Mock
+    private WalletService walletService;
 
     private static Stream<String> nullAndEmptyStrings() {
         return Stream.of("", null);
@@ -21,6 +34,7 @@ class WalletTransactionTest {
     @Test
     void should_return_wallet_transaction_when_create_success()
             throws NoSuchFieldException, IllegalAccessException {
+        // given
         String preAssignedId = UUID.randomUUID().toString();
         Long buyerId = 123L;
         Long sellerId = 234L;
@@ -28,9 +42,11 @@ class WalletTransactionTest {
         String orderId = UUID.randomUUID().toString();
         Double amount = 34.5;
 
+        // when
         WalletTransaction walletTransaction =
                 new WalletTransaction(preAssignedId, buyerId, sellerId, productId, orderId, amount);
 
+        // then
         assertThat(walletTransaction).isNotNull();
         assertThat(getPrivateField(walletTransaction, "id", String.class)).startsWith("t_");
         assertThat(getPrivateField(walletTransaction, "buyerId", Long.class)).isEqualTo(buyerId);
@@ -46,18 +62,48 @@ class WalletTransactionTest {
 
     @ParameterizedTest
     @MethodSource("nullAndEmptyStrings")
-    void should_return_wallet_transaction_with_id_when_create_given_without_pre_assigned_id(String preAssignedId)
-            throws NoSuchFieldException, IllegalAccessException {
+    void should_return_wallet_transaction_with_id_when_create_given_without_pre_assigned_id(
+            String preAssignedId) throws NoSuchFieldException, IllegalAccessException {
+        // given
         Long buyerId = 123L;
         Long sellerId = 234L;
         Long productId = 8989L;
         String orderId = UUID.randomUUID().toString();
         Double amount = 34.5;
 
+        // when
         WalletTransaction walletTransaction =
                 new WalletTransaction(preAssignedId, buyerId, sellerId, productId, orderId, amount);
 
+        // then
         assertThat(getPrivateField(walletTransaction, "id", String.class)).startsWith("t_");
+    }
+
+    @Test
+    void should_return_true_when_execute_transaction_success() throws InvalidTransactionException {
+        // given
+        String preAssignedId = "t_" + UUID.randomUUID().toString();
+        Long buyerId = 123L;
+        Long sellerId = 234L;
+        Long productId = 8989L;
+        String orderId = UUID.randomUUID().toString();
+        Double amount = 34.5;
+
+        given(distributedLock.lock(preAssignedId)).willReturn(true);
+        String walletTransactionId = UUID.randomUUID().toString();
+        given(walletService.moveMoney(preAssignedId, buyerId, sellerId, amount))
+                .willReturn(walletTransactionId);
+
+        WalletTransaction walletTransaction =
+                new WalletTransaction(preAssignedId, buyerId, sellerId, productId, orderId, amount);
+        walletTransaction.setDistributedLock(distributedLock);
+        walletTransaction.setWalletService(walletService);
+
+        // when
+        boolean executeResult = walletTransaction.execute();
+
+        // then
+        assertThat(executeResult).isTrue();
     }
 
     private <T> T getPrivateField(

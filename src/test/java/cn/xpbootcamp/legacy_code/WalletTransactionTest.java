@@ -19,6 +19,7 @@ import static cn.xpbootcamp.legacy_code.enums.STATUS.TO_BE_EXECUTED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class WalletTransactionTest {
@@ -153,6 +154,37 @@ class WalletTransactionTest {
         // when then
         assertThatExceptionOfType(InvalidTransactionException.class)
                 .isThrownBy(walletTransaction::execute);
+    }
+
+    @Test
+    void should_return_true_when_transaction_has_been_executed() throws InvalidTransactionException {
+        // given
+        String preAssignedId = "t_" + UUID.randomUUID().toString();
+        Long buyerId = 123L;
+        Long sellerId = 234L;
+        Long productId = 8989L;
+        String orderId = UUID.randomUUID().toString();
+        Double amount = 34.5;
+
+        given(distributedLock.lock(preAssignedId)).willReturn(true);
+        String walletTransactionId = UUID.randomUUID().toString();
+        given(walletService.moveMoney(preAssignedId, buyerId, sellerId, amount))
+                .willReturn(walletTransactionId);
+
+        WalletTransaction walletTransaction =
+                new WalletTransaction(preAssignedId, buyerId, sellerId, productId, orderId, amount);
+        walletTransaction.setDistributedLock(distributedLock);
+        walletTransaction.setWalletService(walletService);
+        walletTransaction.execute();
+
+        // when
+        boolean executeResult = walletTransaction.execute();
+
+        // then
+        assertThat(executeResult).isTrue();
+        verify(distributedLock).lock(preAssignedId);
+        verify(walletService).moveMoney(preAssignedId, buyerId, sellerId, amount);
+        verify(distributedLock).unlock(preAssignedId);
     }
 
     private <T> T getPrivateField(

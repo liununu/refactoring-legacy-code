@@ -78,9 +78,9 @@ class WalletTransactionTest {
     void should_return_true_when_execute_transaction_success() throws InvalidTransactionException {
         // given
         String preAssignedId = "t_" + UUID.randomUUID().toString();
-        Long buyerId = 123L;
-        Long sellerId = 234L;
-        Double amount = 34.5;
+        long buyerId = 123L;
+        long sellerId = 234L;
+        double amount = 34.5;
 
         given(distributedLock.lock(preAssignedId)).willReturn(true);
         String walletTransactionId = UUID.randomUUID().toString();
@@ -145,9 +145,9 @@ class WalletTransactionTest {
     void should_return_true_when_transaction_has_been_executed() throws InvalidTransactionException {
         // given
         String preAssignedId = "t_" + UUID.randomUUID().toString();
-        Long buyerId = 123L;
-        Long sellerId = 234L;
-        Double amount = 34.5;
+        long buyerId = 123L;
+        long sellerId = 234L;
+        double amount = 34.5;
 
         given(distributedLock.lock(preAssignedId)).willReturn(true);
         String walletTransactionId = UUID.randomUUID().toString();
@@ -205,7 +205,7 @@ class WalletTransactionTest {
         WalletTransaction walletTransaction =
                 new WalletTransaction(preAssignedId, buyerId, sellerId, amount);
         walletTransaction.setDistributedLock(distributedLock);
-        setPrivateField(walletTransaction, "createdTimestamp", 0L);
+        setCreatedTimeStampOver20DaysAgo(walletTransaction);
 
         // when
         boolean executeResult = walletTransaction.execute();
@@ -220,9 +220,9 @@ class WalletTransactionTest {
             throws InvalidTransactionException, NoSuchFieldException, IllegalAccessException {
         // given
         String preAssignedId = "t_" + UUID.randomUUID().toString();
-        Long buyerId = 123L;
-        Long sellerId = 234L;
-        Double amount = 34.5;
+        long buyerId = 123L;
+        long sellerId = 234L;
+        double amount = 34.5;
 
         given(distributedLock.lock(preAssignedId)).willReturn(true);
         given(walletService.moveMoney(preAssignedId, buyerId, sellerId, amount))
@@ -241,11 +241,11 @@ class WalletTransactionTest {
         assertThat(getPrivateField(walletTransaction, "status", STATUS.class)).isEqualTo(FAILED);
     }
 
-    private void setPrivateField(WalletTransaction walletTransaction, String fieldName, Object value)
+    private void setCreatedTimeStampOver20DaysAgo(WalletTransaction walletTransaction)
             throws NoSuchFieldException, IllegalAccessException {
-        Field field = WalletTransaction.class.getDeclaredField(fieldName);
+        Field field = WalletTransaction.class.getDeclaredField("createdTimestamp");
         field.setAccessible(true);
-        field.set(walletTransaction, value);
+        field.set(walletTransaction, 0);
     }
 
     private <T> T getPrivateField(

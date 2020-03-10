@@ -187,6 +187,30 @@ class WalletTransactionTest {
         verify(distributedLock).unlock(preAssignedId);
     }
 
+    @Test
+    void should_return_false_when_transaction_distributed_not_lock_on() throws InvalidTransactionException {
+        // given
+        String preAssignedId = "t_" + UUID.randomUUID().toString();
+        Long buyerId = 123L;
+        Long sellerId = 234L;
+        Long productId = 8989L;
+        String orderId = UUID.randomUUID().toString();
+        Double amount = 34.5;
+
+        given(distributedLock.lock(preAssignedId)).willReturn(false);
+
+        WalletTransaction walletTransaction =
+                new WalletTransaction(preAssignedId, buyerId, sellerId, productId, orderId, amount);
+        walletTransaction.setDistributedLock(distributedLock);
+
+        // when
+        boolean executeResult = walletTransaction.execute();
+
+        // then
+        assertThat(executeResult).isFalse();
+    }
+
+
     private <T> T getPrivateField(
             WalletTransaction walletTransaction, String fieldName, Class<T> type)
             throws NoSuchFieldException, IllegalAccessException {

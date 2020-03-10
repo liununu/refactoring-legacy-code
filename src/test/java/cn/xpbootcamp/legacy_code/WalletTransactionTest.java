@@ -245,7 +245,7 @@ class WalletTransactionTest {
             throws NoSuchFieldException, IllegalAccessException {
         Field field = WalletTransaction.class.getDeclaredField("createdTimestamp");
         field.setAccessible(true);
-        field.set(walletTransaction, 0);
+        field.set(walletTransaction, 0L);
     }
 
     private <T> T getPrivateField(

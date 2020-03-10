@@ -15,8 +15,7 @@ import java.lang.reflect.Field;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static cn.xpbootcamp.legacy_code.enums.STATUS.EXPIRED;
-import static cn.xpbootcamp.legacy_code.enums.STATUS.TO_BE_EXECUTED;
+import static cn.xpbootcamp.legacy_code.enums.STATUS.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.BDDMockito.given;
@@ -211,7 +210,6 @@ class WalletTransactionTest {
         assertThat(executeResult).isFalse();
     }
 
-
     @Test
     void should_return_false_when_transaction_created_time_over_20_days()
             throws InvalidTransactionException, NoSuchFieldException, IllegalAccessException {
@@ -238,8 +236,35 @@ class WalletTransactionTest {
         assertThat(getPrivateField(walletTransaction, "status", STATUS.class)).isEqualTo(EXPIRED);
     }
 
-    private void setPrivateField(
-            WalletTransaction walletTransaction, String fieldName, Object value)
+    @Test
+    void should_return_false_when_execute_transaction_with_wallet_service_move_money_failed()
+            throws InvalidTransactionException, NoSuchFieldException, IllegalAccessException {
+        // given
+        String preAssignedId = "t_" + UUID.randomUUID().toString();
+        Long buyerId = 123L;
+        Long sellerId = 234L;
+        Long productId = 8989L;
+        String orderId = UUID.randomUUID().toString();
+        Double amount = 34.5;
+
+        given(distributedLock.lock(preAssignedId)).willReturn(true);
+        given(walletService.moveMoney(preAssignedId, buyerId, sellerId, amount))
+                .willReturn(null);
+
+        WalletTransaction walletTransaction =
+                new WalletTransaction(preAssignedId, buyerId, sellerId, productId, orderId, amount);
+        walletTransaction.setDistributedLock(distributedLock);
+        walletTransaction.setWalletService(walletService);
+
+        // when
+        boolean executeResult = walletTransaction.execute();
+
+        // then
+        assertThat(executeResult).isFalse();
+        assertThat(getPrivateField(walletTransaction, "status", STATUS.class)).isEqualTo(FAILED);
+    }
+
+    private void setPrivateField(WalletTransaction walletTransaction, String fieldName, Object value)
             throws NoSuchFieldException, IllegalAccessException {
         Field field = WalletTransaction.class.getDeclaredField(fieldName);
         field.setAccessible(true);

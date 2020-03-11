@@ -41,7 +41,7 @@ public class WalletTransaction {
             Long buyerId,
             Long sellerId,
             Double amount) {
-        if (buyerId == null) {
+        if (buyerId == null || sellerId == null) {
             throw new InvalidTransactionException("This is an invalid transaction");
         }
         return new WalletTransaction(preAssignedId, buyerId, sellerId, amount);
@@ -62,7 +62,7 @@ public class WalletTransaction {
     }
 
     public boolean execute() {
-        if ((sellerId == null || amount < 0.0)) {
+        if (( amount < 0.0)) {
             throw new InvalidTransactionException("This is an invalid transaction");
         }
         if (status == WalletTransactionStatus.EXECUTED) return true;

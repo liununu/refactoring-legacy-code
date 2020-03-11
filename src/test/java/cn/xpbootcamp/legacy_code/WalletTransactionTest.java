@@ -109,21 +109,21 @@ class WalletTransactionTest {
 
         // when then
         assertThatExceptionOfType(InvalidTransactionException.class)
-                .isThrownBy(() -> generateWalletTransaction(preAssignedId, null, sellerId, amount));
+                .isThrownBy(() -> generateWalletTransaction(preAssignedId, null, sellerId, amount))
+                .withMessage("This is an invalid transaction");
     }
 
     @Test
-    void should_throw_invalid_transaction_exception_when_execute_with_null_seller_id() {
+    void should_throw_invalid_transaction_exception_when_generate_with_null_seller_id() {
         // given
         String preAssignedId = "t_" + UUID.randomUUID().toString();
         Long buyerId = 123L;
         Double amount = 34.5;
-        WalletTransaction walletTransaction =
-                generateWalletTransaction(preAssignedId, buyerId, null, amount);
 
         // when then
         assertThatExceptionOfType(InvalidTransactionException.class)
-                .isThrownBy(walletTransaction::execute);
+                .isThrownBy(() -> generateWalletTransaction(preAssignedId, buyerId, null, amount))
+                .withMessage("This is an invalid transaction");
     }
 
     @Test

@@ -83,7 +83,7 @@ public class WalletTransaction {
             }
 
             String walletTransactionReceiptId = walletService.moveMoney(id, buyerId, sellerId, amount);
-            if (walletTransactionReceiptId != null) {
+            if (isMoveMoneySuccess(walletTransactionReceiptId)) {
                 this.status = EXECUTED;
                 return true;
             } else {
@@ -95,6 +95,10 @@ public class WalletTransaction {
                 distributedLock.unlock(id);
             }
         }
+    }
+
+    private boolean isMoveMoneySuccess(String walletTransactionReceiptId) {
+        return walletTransactionReceiptId != null;
     }
 
     private boolean isTransactionExpired() {

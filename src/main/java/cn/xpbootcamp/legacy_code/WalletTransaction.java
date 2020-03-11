@@ -5,6 +5,7 @@ import cn.xpbootcamp.legacy_code.exception.InvalidTransactionException;
 import cn.xpbootcamp.legacy_code.service.WalletService;
 import cn.xpbootcamp.legacy_code.utils.DistributedLock;
 
+import static cn.xpbootcamp.legacy_code.enums.WalletTransactionStatus.EXECUTED;
 import static cn.xpbootcamp.legacy_code.enums.WalletTransactionStatus.TO_BE_EXECUTED;
 import static cn.xpbootcamp.legacy_code.utils.IdGenerator.generateId;
 import static java.util.Optional.ofNullable;
@@ -62,25 +63,29 @@ public class WalletTransaction {
     }
 
     public boolean execute() {
-        if (status == WalletTransactionStatus.EXECUTED) return true;
+        if (status == EXECUTED) {
+            return true;
+        }
         boolean isLocked = false;
         try {
             isLocked = distributedLock.lock(id);
 
-            // 锁定未成功，返回false
             if (!isLocked) {
                 return false;
             }
-            if (status == WalletTransactionStatus.EXECUTED) return true; // double check
+            if (status == EXECUTED) {
+                return true;
+            }
+
             long executionInvokedTimestamp = System.currentTimeMillis();
-            // 交易超过20天
             if (executionInvokedTimestamp - createdTimestamp > 1728000000) {
                 this.status = WalletTransactionStatus.EXPIRED;
                 return false;
             }
+
             String walletTransactionId = walletService.moveMoney(id, buyerId, sellerId, amount);
             if (walletTransactionId != null) {
-                this.status = WalletTransactionStatus.EXECUTED;
+                this.status = EXECUTED;
                 return true;
             } else {
                 this.status = WalletTransactionStatus.FAILED;

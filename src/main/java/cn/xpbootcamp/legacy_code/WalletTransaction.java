@@ -7,7 +7,7 @@ import cn.xpbootcamp.legacy_code.utils.DistributedLock;
 import javax.transaction.InvalidTransactionException;
 
 import static cn.xpbootcamp.legacy_code.enums.WalletTransactionStatus.TO_BE_EXECUTED;
-import static cn.xpbootcamp.legacy_code.utils.IdGenerator.generateTransactionId;
+import static cn.xpbootcamp.legacy_code.utils.IdGenerator.generateId;
 import static java.util.Optional.ofNullable;
 
 public class WalletTransaction {
@@ -40,7 +40,7 @@ public class WalletTransaction {
     private String generateWalletTransactionId(String preAssignedId) {
         return ofNullable(preAssignedId)
                 .filter(id -> id.startsWith(ID_PREFIX))
-                .orElseGet(() -> ID_PREFIX + generateTransactionId());
+                .orElseGet(() -> ID_PREFIX + generateId());
     }
 
     public void setDistributedLock(DistributedLock distributedLock) {

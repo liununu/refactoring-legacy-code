@@ -3,7 +3,7 @@ package cn.xpbootcamp.legacy_code.utils;
 import java.util.UUID;
 
 public class IdGenerator {
-    public static String generateTransactionId() {
+    public static String generateId() {
         return UUID.randomUUID().toString();
     }
 }

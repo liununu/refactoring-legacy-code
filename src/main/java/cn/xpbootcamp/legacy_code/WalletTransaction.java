@@ -82,8 +82,8 @@ public class WalletTransaction {
                 return false;
             }
 
-            String walletTransactionId = walletService.moveMoney(id, buyerId, sellerId, amount);
-            if (walletTransactionId != null) {
+            String walletTransactionReceiptId = walletService.moveMoney(id, buyerId, sellerId, amount);
+            if (walletTransactionReceiptId != null) {
                 this.status = EXECUTED;
                 return true;
             } else {

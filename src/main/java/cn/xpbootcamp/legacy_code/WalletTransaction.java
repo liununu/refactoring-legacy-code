@@ -5,14 +5,14 @@ import cn.xpbootcamp.legacy_code.exception.InvalidTransactionException;
 import cn.xpbootcamp.legacy_code.service.WalletService;
 import cn.xpbootcamp.legacy_code.utils.DistributedLock;
 
-import static cn.xpbootcamp.legacy_code.enums.WalletTransactionStatus.EXECUTED;
-import static cn.xpbootcamp.legacy_code.enums.WalletTransactionStatus.TO_BE_EXECUTED;
+import static cn.xpbootcamp.legacy_code.enums.WalletTransactionStatus.*;
 import static cn.xpbootcamp.legacy_code.utils.IdGenerator.generateId;
 import static java.util.Optional.ofNullable;
 
 public class WalletTransaction {
 
     private static final String ID_PREFIX = "t_";
+    private static final int MAX_PERIOD_OF_EXPIRATION = 20 * 24 * 60 * 60 * 1000;
 
     private String id;
     private Long buyerId;
@@ -77,9 +77,8 @@ public class WalletTransaction {
                 return true;
             }
 
-            long executionInvokedTimestamp = System.currentTimeMillis();
-            if (executionInvokedTimestamp - createdTimestamp > 1728000000) {
-                this.status = WalletTransactionStatus.EXPIRED;
+            if (isTransactionExpired()) {
+                this.status = EXPIRED;
                 return false;
             }
 
@@ -88,7 +87,7 @@ public class WalletTransaction {
                 this.status = EXECUTED;
                 return true;
             } else {
-                this.status = WalletTransactionStatus.FAILED;
+                this.status = FAILED;
                 return false;
             }
         } finally {
@@ -96,6 +95,10 @@ public class WalletTransaction {
                 distributedLock.unlock(id);
             }
         }
+    }
+
+    private boolean isTransactionExpired() {
+        return System.currentTimeMillis() - createdTimestamp > MAX_PERIOD_OF_EXPIRATION;
     }
 
 }

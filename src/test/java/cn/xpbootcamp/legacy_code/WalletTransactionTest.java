@@ -127,17 +127,15 @@ class WalletTransactionTest {
     }
 
     @Test
-    void should_throw_invalid_transaction_exception_when_execute_with_amount_less_than_0() {
+    void should_throw_invalid_transaction_exception_when_generate_with_amount_less_than_0() {
         // given
         String preAssignedId = "t_" + UUID.randomUUID().toString();
         Long buyerId = 123L;
         Long sellerId = 234L;
-        WalletTransaction walletTransaction =
-                generateWalletTransaction(preAssignedId, buyerId, sellerId, -0.01);
 
         // when then
         assertThatExceptionOfType(InvalidTransactionException.class)
-                .isThrownBy(walletTransaction::execute);
+                .isThrownBy(() -> generateWalletTransaction(preAssignedId, buyerId, sellerId, -0.01));
     }
 
     @Test

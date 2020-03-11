@@ -3,11 +3,17 @@ package cn.xpbootcamp.legacy_code;
 import cn.xpbootcamp.legacy_code.enums.WalletTransactionStatus;
 import cn.xpbootcamp.legacy_code.service.WalletService;
 import cn.xpbootcamp.legacy_code.utils.DistributedLock;
-import cn.xpbootcamp.legacy_code.utils.IdGenerator;
 
 import javax.transaction.InvalidTransactionException;
 
+import static cn.xpbootcamp.legacy_code.enums.WalletTransactionStatus.TO_BE_EXECUTED;
+import static cn.xpbootcamp.legacy_code.utils.IdGenerator.generateTransactionId;
+import static java.util.Optional.ofNullable;
+
 public class WalletTransaction {
+
+    private static final String ID_PREFIX = "t_";
+
     private String id;
     private Long buyerId;
     private Long sellerId;
@@ -23,19 +29,18 @@ public class WalletTransaction {
             Long buyerId,
             Long sellerId,
             Double amount) {
-        if (preAssignedId != null && !preAssignedId.isEmpty()) {
-            this.id = preAssignedId;
-        } else {
-            this.id = IdGenerator.generateTransactionId();
-        }
-        if (!this.id.startsWith("t_")) {
-            this.id = "t_" + this.id;
-        }
+        this.id = generateWalletTransactionId(preAssignedId);
         this.buyerId = buyerId;
         this.sellerId = sellerId;
         this.amount = amount;
-        this.status = WalletTransactionStatus.TO_BE_EXECUTED;
+        this.status = TO_BE_EXECUTED;
         this.createdTimestamp = System.currentTimeMillis();
+    }
+
+    private String generateWalletTransactionId(String preAssignedId) {
+        return ofNullable(preAssignedId)
+                .filter(id -> id.startsWith(ID_PREFIX))
+                .orElseGet(() -> ID_PREFIX + generateTransactionId());
     }
 
     public void setDistributedLock(DistributedLock distributedLock) {

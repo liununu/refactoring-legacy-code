@@ -29,7 +29,7 @@ public class WalletTransaction {
             this.id = IdGenerator.generateTransactionId();
         }
         if (!this.id.startsWith("t_")) {
-            this.id = "t_" + preAssignedId;
+            this.id = "t_" + this.id;
         }
         this.buyerId = buyerId;
         this.sellerId = sellerId;

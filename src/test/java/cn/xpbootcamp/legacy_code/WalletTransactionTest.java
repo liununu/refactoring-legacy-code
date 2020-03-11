@@ -48,7 +48,7 @@ class WalletTransactionTest {
 
         // then
         assertThat(walletTransaction).isNotNull();
-        assertThat(getPrivateField(walletTransaction, "id", String.class)).startsWith("t_");
+        assertThat(getPrivateField(walletTransaction, "id", String.class)).startsWith("t_").hasSize(38);
         assertThat(getPrivateField(walletTransaction, "buyerId", Long.class)).isEqualTo(buyerId);
         assertThat(getPrivateField(walletTransaction, "sellerId", Long.class)).isEqualTo(sellerId);
         assertThat(getPrivateField(walletTransaction, "createdTimestamp", Long.class)).isNotNull();
@@ -71,7 +71,7 @@ class WalletTransactionTest {
                 new WalletTransaction(preAssignedId, buyerId, sellerId, amount);
 
         // then
-        assertThat(getPrivateField(walletTransaction, "id", String.class)).startsWith("t_");
+        assertThat(getPrivateField(walletTransaction, "id", String.class)).startsWith("t_").hasSize(38);
     }
 
     @Test
@@ -171,7 +171,8 @@ class WalletTransactionTest {
     }
 
     @Test
-    void should_return_false_when_transaction_distributed_not_lock_on() throws InvalidTransactionException {
+    void should_return_false_when_transaction_distributed_not_lock_on()
+            throws InvalidTransactionException {
         // given
         String preAssignedId = "t_" + UUID.randomUUID().toString();
         Long buyerId = 123L;
@@ -212,7 +213,8 @@ class WalletTransactionTest {
 
         // then
         assertThat(executeResult).isFalse();
-        assertThat(getPrivateField(walletTransaction, "status", WalletTransactionStatus.class)).isEqualTo(EXPIRED);
+        assertThat(getPrivateField(walletTransaction, "status", WalletTransactionStatus.class))
+                .isEqualTo(EXPIRED);
     }
 
     @Test
@@ -225,8 +227,7 @@ class WalletTransactionTest {
         double amount = 34.5;
 
         given(distributedLock.lock(preAssignedId)).willReturn(true);
-        given(walletService.moveMoney(preAssignedId, buyerId, sellerId, amount))
-                .willReturn(null);
+        given(walletService.moveMoney(preAssignedId, buyerId, sellerId, amount)).willReturn(null);
 
         WalletTransaction walletTransaction =
                 new WalletTransaction(preAssignedId, buyerId, sellerId, amount);
@@ -238,7 +239,8 @@ class WalletTransactionTest {
 
         // then
         assertThat(executeResult).isFalse();
-        assertThat(getPrivateField(walletTransaction, "status", WalletTransactionStatus.class)).isEqualTo(FAILED);
+        assertThat(getPrivateField(walletTransaction, "status", WalletTransactionStatus.class))
+                .isEqualTo(FAILED);
     }
 
     private void setCreatedTimeStampOver20DaysAgo(WalletTransaction walletTransaction)

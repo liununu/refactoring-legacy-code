@@ -1,6 +1,7 @@
 package cn.xpbootcamp.legacy_code;
 
 import cn.xpbootcamp.legacy_code.enums.WalletTransactionStatus;
+import cn.xpbootcamp.legacy_code.exception.InvalidTransactionException;
 import cn.xpbootcamp.legacy_code.service.WalletService;
 import cn.xpbootcamp.legacy_code.utils.DistributedLock;
 import org.junit.jupiter.api.Test;
@@ -10,7 +11,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.transaction.InvalidTransactionException;
 import java.lang.reflect.Field;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -36,7 +36,7 @@ class WalletTransactionTest {
 
     @Test
     void should_return_wallet_transaction_when_create_success()
-            throws NoSuchFieldException, IllegalAccessException, InvalidTransactionException {
+            throws NoSuchFieldException, IllegalAccessException {
         // given
         String preAssignedId = UUID.randomUUID().toString();
         Long buyerId = 123L;
@@ -61,7 +61,7 @@ class WalletTransactionTest {
     @ParameterizedTest
     @MethodSource("nullAndEmptyStrings")
     void should_return_wallet_transaction_with_id_when_create_given_without_pre_assigned_id(
-            String preAssignedId) throws NoSuchFieldException, IllegalAccessException, InvalidTransactionException {
+            String preAssignedId) throws NoSuchFieldException, IllegalAccessException {
         // given
         Long buyerId = 123L;
         Long sellerId = 234L;
@@ -76,7 +76,7 @@ class WalletTransactionTest {
     }
 
     @Test
-    void should_return_true_when_execute_transaction_success() throws InvalidTransactionException {
+    void should_return_true_when_execute_transaction_success() {
         // given
         String preAssignedId = "t_" + UUID.randomUUID().toString();
         long buyerId = 123L;
@@ -101,7 +101,7 @@ class WalletTransactionTest {
     }
 
     @Test
-    void should_throw_invalid_transaction_exception_when_generate_with_null_buyer_id() throws InvalidTransactionException {
+    void should_throw_invalid_transaction_exception_when_generate_with_null_buyer_id() {
         // given
         String preAssignedId = "t_" + UUID.randomUUID().toString();
         Long sellerId = 234L;
@@ -113,7 +113,7 @@ class WalletTransactionTest {
     }
 
     @Test
-    void should_throw_invalid_transaction_exception_when_execute_with_null_seller_id() throws InvalidTransactionException {
+    void should_throw_invalid_transaction_exception_when_execute_with_null_seller_id() {
         // given
         String preAssignedId = "t_" + UUID.randomUUID().toString();
         Long buyerId = 123L;
@@ -127,7 +127,7 @@ class WalletTransactionTest {
     }
 
     @Test
-    void should_throw_invalid_transaction_exception_when_execute_with_amount_less_than_0() throws InvalidTransactionException {
+    void should_throw_invalid_transaction_exception_when_execute_with_amount_less_than_0() {
         // given
         String preAssignedId = "t_" + UUID.randomUUID().toString();
         Long buyerId = 123L;
@@ -141,7 +141,7 @@ class WalletTransactionTest {
     }
 
     @Test
-    void should_return_true_when_transaction_has_been_executed() throws InvalidTransactionException {
+    void should_return_true_when_transaction_has_been_executed() {
         // given
         String preAssignedId = "t_" + UUID.randomUUID().toString();
         long buyerId = 123L;
@@ -170,8 +170,7 @@ class WalletTransactionTest {
     }
 
     @Test
-    void should_return_false_when_transaction_distributed_not_lock_on()
-            throws InvalidTransactionException {
+    void should_return_false_when_transaction_distributed_not_lock_on() {
         // given
         String preAssignedId = "t_" + UUID.randomUUID().toString();
         Long buyerId = 123L;
@@ -193,7 +192,7 @@ class WalletTransactionTest {
 
     @Test
     void should_return_false_when_transaction_created_time_over_20_days()
-            throws InvalidTransactionException, NoSuchFieldException, IllegalAccessException {
+            throws NoSuchFieldException, IllegalAccessException {
         // given
         String preAssignedId = "t_" + UUID.randomUUID().toString();
         Long buyerId = 123L;
@@ -218,7 +217,7 @@ class WalletTransactionTest {
 
     @Test
     void should_return_false_when_execute_transaction_with_wallet_service_move_money_failed()
-            throws InvalidTransactionException, NoSuchFieldException, IllegalAccessException {
+            throws NoSuchFieldException, IllegalAccessException {
         // given
         String preAssignedId = "t_" + UUID.randomUUID().toString();
         long buyerId = 123L;

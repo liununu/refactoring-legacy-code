@@ -1,10 +1,9 @@
 package cn.xpbootcamp.legacy_code;
 
 import cn.xpbootcamp.legacy_code.enums.WalletTransactionStatus;
+import cn.xpbootcamp.legacy_code.exception.InvalidTransactionException;
 import cn.xpbootcamp.legacy_code.service.WalletService;
 import cn.xpbootcamp.legacy_code.utils.DistributedLock;
-
-import javax.transaction.InvalidTransactionException;
 
 import static cn.xpbootcamp.legacy_code.enums.WalletTransactionStatus.TO_BE_EXECUTED;
 import static cn.xpbootcamp.legacy_code.utils.IdGenerator.generateId;
@@ -41,7 +40,7 @@ public class WalletTransaction {
             String preAssignedId,
             Long buyerId,
             Long sellerId,
-            Double amount) throws InvalidTransactionException {
+            Double amount) {
         if (buyerId == null) {
             throw new InvalidTransactionException("This is an invalid transaction");
         }
@@ -62,7 +61,7 @@ public class WalletTransaction {
         this.walletService = walletService;
     }
 
-    public boolean execute() throws InvalidTransactionException {
+    public boolean execute() {
         if ((sellerId == null || amount < 0.0)) {
             throw new InvalidTransactionException("This is an invalid transaction");
         }

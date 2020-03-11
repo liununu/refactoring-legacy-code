@@ -15,6 +15,7 @@ import java.lang.reflect.Field;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static cn.xpbootcamp.legacy_code.WalletTransaction.generateWalletTransaction;
 import static cn.xpbootcamp.legacy_code.enums.WalletTransactionStatus.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -35,7 +36,7 @@ class WalletTransactionTest {
 
     @Test
     void should_return_wallet_transaction_when_create_success()
-            throws NoSuchFieldException, IllegalAccessException {
+            throws NoSuchFieldException, IllegalAccessException, InvalidTransactionException {
         // given
         String preAssignedId = UUID.randomUUID().toString();
         Long buyerId = 123L;
@@ -44,7 +45,7 @@ class WalletTransactionTest {
 
         // when
         WalletTransaction walletTransaction =
-                new WalletTransaction(preAssignedId, buyerId, sellerId, amount);
+                generateWalletTransaction(preAssignedId, buyerId, sellerId, amount);
 
         // then
         assertThat(walletTransaction).isNotNull();
@@ -60,7 +61,7 @@ class WalletTransactionTest {
     @ParameterizedTest
     @MethodSource("nullAndEmptyStrings")
     void should_return_wallet_transaction_with_id_when_create_given_without_pre_assigned_id(
-            String preAssignedId) throws NoSuchFieldException, IllegalAccessException {
+            String preAssignedId) throws NoSuchFieldException, IllegalAccessException, InvalidTransactionException {
         // given
         Long buyerId = 123L;
         Long sellerId = 234L;
@@ -68,7 +69,7 @@ class WalletTransactionTest {
 
         // when
         WalletTransaction walletTransaction =
-                new WalletTransaction(preAssignedId, buyerId, sellerId, amount);
+                generateWalletTransaction(preAssignedId, buyerId, sellerId, amount);
 
         // then
         assertThat(getPrivateField(walletTransaction, "id", String.class)).startsWith("t_").hasSize(38);
@@ -88,7 +89,7 @@ class WalletTransactionTest {
                 .willReturn(walletTransactionId);
 
         WalletTransaction walletTransaction =
-                new WalletTransaction(preAssignedId, buyerId, sellerId, amount);
+                generateWalletTransaction(preAssignedId, buyerId, sellerId, amount);
         walletTransaction.setDistributedLock(distributedLock);
         walletTransaction.setWalletService(walletService);
 
@@ -100,13 +101,25 @@ class WalletTransactionTest {
     }
 
     @Test
-    void should_throw_invalid_transaction_exception_when_execute_with_null_buyer_id() {
+    void should_throw_invalid_transaction_exception_when_generate_with_null_buyer_id() throws InvalidTransactionException {
         // given
         String preAssignedId = "t_" + UUID.randomUUID().toString();
         Long sellerId = 234L;
         Double amount = 34.5;
+
+        // when then
+        assertThatExceptionOfType(InvalidTransactionException.class)
+                .isThrownBy(() -> generateWalletTransaction(preAssignedId, null, sellerId, amount));
+    }
+
+    @Test
+    void should_throw_invalid_transaction_exception_when_execute_with_null_seller_id() throws InvalidTransactionException {
+        // given
+        String preAssignedId = "t_" + UUID.randomUUID().toString();
+        Long buyerId = 123L;
+        Double amount = 34.5;
         WalletTransaction walletTransaction =
-                new WalletTransaction(preAssignedId, null, sellerId, amount);
+                generateWalletTransaction(preAssignedId, buyerId, null, amount);
 
         // when then
         assertThatExceptionOfType(InvalidTransactionException.class)
@@ -114,27 +127,13 @@ class WalletTransactionTest {
     }
 
     @Test
-    void should_throw_invalid_transaction_exception_when_execute_with_null_seller_id() {
-        // given
-        String preAssignedId = "t_" + UUID.randomUUID().toString();
-        Long buyerId = 123L;
-        Double amount = 34.5;
-        WalletTransaction walletTransaction =
-                new WalletTransaction(preAssignedId, buyerId, null, amount);
-
-        // when then
-        assertThatExceptionOfType(InvalidTransactionException.class)
-                .isThrownBy(walletTransaction::execute);
-    }
-
-    @Test
-    void should_throw_invalid_transaction_exception_when_execute_with_amount_less_than_0() {
+    void should_throw_invalid_transaction_exception_when_execute_with_amount_less_than_0() throws InvalidTransactionException {
         // given
         String preAssignedId = "t_" + UUID.randomUUID().toString();
         Long buyerId = 123L;
         Long sellerId = 234L;
         WalletTransaction walletTransaction =
-                new WalletTransaction(preAssignedId, buyerId, sellerId, -0.01);
+                generateWalletTransaction(preAssignedId, buyerId, sellerId, -0.01);
 
         // when then
         assertThatExceptionOfType(InvalidTransactionException.class)
@@ -155,7 +154,7 @@ class WalletTransactionTest {
                 .willReturn(walletTransactionId);
 
         WalletTransaction walletTransaction =
-                new WalletTransaction(preAssignedId, buyerId, sellerId, amount);
+                generateWalletTransaction(preAssignedId, buyerId, sellerId, amount);
         walletTransaction.setDistributedLock(distributedLock);
         walletTransaction.setWalletService(walletService);
         walletTransaction.execute();
@@ -182,7 +181,7 @@ class WalletTransactionTest {
         given(distributedLock.lock(preAssignedId)).willReturn(false);
 
         WalletTransaction walletTransaction =
-                new WalletTransaction(preAssignedId, buyerId, sellerId, amount);
+                generateWalletTransaction(preAssignedId, buyerId, sellerId, amount);
         walletTransaction.setDistributedLock(distributedLock);
 
         // when
@@ -204,7 +203,7 @@ class WalletTransactionTest {
         given(distributedLock.lock(preAssignedId)).willReturn(true);
 
         WalletTransaction walletTransaction =
-                new WalletTransaction(preAssignedId, buyerId, sellerId, amount);
+                generateWalletTransaction(preAssignedId, buyerId, sellerId, amount);
         walletTransaction.setDistributedLock(distributedLock);
         setCreatedTimeStampOver20DaysAgo(walletTransaction);
 
@@ -230,7 +229,7 @@ class WalletTransactionTest {
         given(walletService.moveMoney(preAssignedId, buyerId, sellerId, amount)).willReturn(null);
 
         WalletTransaction walletTransaction =
-                new WalletTransaction(preAssignedId, buyerId, sellerId, amount);
+                generateWalletTransaction(preAssignedId, buyerId, sellerId, amount);
         walletTransaction.setDistributedLock(distributedLock);
         walletTransaction.setWalletService(walletService);
 

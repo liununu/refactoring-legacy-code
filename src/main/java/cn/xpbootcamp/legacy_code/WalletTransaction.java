@@ -24,7 +24,7 @@ public class WalletTransaction {
     private DistributedLock distributedLock;
     private WalletService walletService;
 
-    public WalletTransaction(
+    private WalletTransaction(
             String preAssignedId,
             Long buyerId,
             Long sellerId,
@@ -35,6 +35,17 @@ public class WalletTransaction {
         this.amount = amount;
         this.status = TO_BE_EXECUTED;
         this.createdTimestamp = System.currentTimeMillis();
+    }
+
+    public static WalletTransaction generateWalletTransaction(
+            String preAssignedId,
+            Long buyerId,
+            Long sellerId,
+            Double amount) throws InvalidTransactionException {
+        if (buyerId == null) {
+            throw new InvalidTransactionException("This is an invalid transaction");
+        }
+        return new WalletTransaction(preAssignedId, buyerId, sellerId, amount);
     }
 
     private String generateWalletTransactionId(String preAssignedId) {
@@ -52,7 +63,7 @@ public class WalletTransaction {
     }
 
     public boolean execute() throws InvalidTransactionException {
-        if (buyerId == null || (sellerId == null || amount < 0.0)) {
+        if ((sellerId == null || amount < 0.0)) {
             throw new InvalidTransactionException("This is an invalid transaction");
         }
         if (status == WalletTransactionStatus.EXECUTED) return true;

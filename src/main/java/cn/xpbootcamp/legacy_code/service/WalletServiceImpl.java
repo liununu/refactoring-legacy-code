@@ -14,13 +14,12 @@ public class WalletServiceImpl implements WalletService {
 
     public String moveMoney(String id, long buyerId, long sellerId, double amount) {
         User buyer = userRepository.find(buyerId);
-        if (buyer.getBalance() >= amount) {
-            User seller = userRepository.find(sellerId);
-            seller.setBalance(seller.getBalance() + amount);
-            buyer.setBalance(buyer.getBalance() - amount);
-            return UUID.randomUUID().toString() + id;
-        } else {
+        if (buyer.getBalance() < amount) {
             return null;
         }
+        User seller = userRepository.find(sellerId);
+        seller.increase(amount);
+        buyer.decrease(amount);
+        return UUID.randomUUID().toString() + id;
     }
 }

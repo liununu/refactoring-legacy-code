@@ -63,6 +63,10 @@ public class WalletTransaction {
     }
 
     public boolean execute() {
+        if (isTransactionExpired()) {
+            this.status = EXPIRED;
+            return false;
+        }
         if (status == EXECUTED) {
             return true;
         }
@@ -75,11 +79,6 @@ public class WalletTransaction {
             }
             if (status == EXECUTED) {
                 return true;
-            }
-
-            if (isTransactionExpired()) {
-                this.status = EXPIRED;
-                return false;
             }
 
             String walletTransactionReceiptId = walletService.moveMoney(id, buyerId, sellerId, amount);

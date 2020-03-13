@@ -197,8 +197,6 @@ class WalletTransactionTest {
         Long sellerId = 234L;
         Double amount = 34.5;
 
-        given(distributedLock.lock(preAssignedId)).willReturn(true);
-
         WalletTransaction walletTransaction =
                 generateWalletTransaction(preAssignedId, buyerId, sellerId, amount);
         walletTransaction.setDistributedLock(distributedLock);
